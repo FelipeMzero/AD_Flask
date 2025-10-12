@@ -1,0 +1,93 @@
+{% extends "layout.html" %}
+{% block title %}Buscar Usuário{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h3>Buscar e Gerenciar Usuário</h3>
+    </div>
+    <div class="card-body">
+        <form method="post" class="mb-4">
+            <div class="input-group">
+                <input type="text" class="form-control" name="termo" placeholder="Digite parte do nome ou login" value="{{ termo or '' }}">
+                <div class="input-group-append">
+                    <button class="btn btn-primary" type="submit">Buscar</button>
+                </div>
+            </div>
+        </form>
+
+        {% if usuarios is not none %}
+            {% if usuarios %}
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>Login</th>
+                                <th>Nome Completo</th>
+                                <th>Status</th>
+                                <th style="width: 40%;">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in usuarios %}
+                            <tr>
+                                <td>{{ user.sam }}</td>
+                                <td>{{ user.cn }}</td>
+                                <td>
+                                    <span class="badge badge-{{ 'success' if user.status == 'Habilitado' else 'warning' }}">
+                                        {{ user.status }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <form class="form-inline">
+                                        {% if user.status == 'Habilitado' %}
+                                        <button type="button" class="btn btn-warning btn-sm mr-2" data-toggle="modal" data-target="#confirmModal" data-action="desabilitar" data-user-dn="{{ user.dn }}" data-user-cn="{{ user.cn }}">Desabilitar</button>
+                                        {% else %}
+                                        <button type="button" class="btn btn-success btn-sm mr-2" data-toggle="modal" data-target="#confirmModal" data-action="habilitar" data-user-dn="{{ user.dn }}" data-user-cn="{{ user.cn }}">Habilitar</button>
+                                        {% endif %}
+                                        <div class="input-group input-group-sm">
+                                            <input type="password" name="nova_senha" class="form-control" placeholder="Nova senha">
+                                            <div class="input-group-append">
+                                                <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#confirmModal" data-action="resetar_senha" data-user-dn="{{ user.dn }}" data-user-cn="{{ user.cn }}">Resetar</button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% elif termo %}
+                <div class="alert alert-info">Nenhum usuário encontrado para o termo "<strong>{{ termo }}</strong>".</div>
+            {% endif %}
+        {% endif %}
+        <a href="{{ url_for('menu') }}" class="btn btn-secondary mt-3">Voltar ao Menu</a>
+    </div>
+</div>
+
+<div class="modal fade" id="confirmModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmar Ação</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-body-text"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                <form action="{{ url_for('gerenciar_usuario') }}" method="post">
+                    <input type="hidden" name="user_dn" id="modal-confirm-form-user-dn">
+                    <input type="hidden" name="acao" id="modal-confirm-form-action">
+                    <input type="hidden" name="nova_senha" id="modal-confirm-form-nova-senha">
+                    <button type="submit" class="btn btn-danger">Confirmar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

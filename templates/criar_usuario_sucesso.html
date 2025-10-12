@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+{% block title %}Usuário Criado!{% endblock %}
+
+{% block content %}
+<div class="card text-center">
+    <div class="card-header">
+        Sucesso!
+    </div>
+    <div class="card-body">
+        <h5 class="card-title">Usuário Criado com Sucesso!</h5>
+        <div class="success-box my-4">
+            <p><strong>Nome de Usuário:</strong> <code>{{ username }}</code></p>
+            <p><strong>Senha Temporária:</strong> <code>{{ password }}</code></p>
+        </div>
+        <a href="{{ url_for('menu') }}" class="btn btn-primary">Voltar ao Menu</a>
+        <a href="{{ url_for('criar_usuario') }}" class="btn btn-secondary">Criar Outro Usuário</a>
+    </div>
+</div>
+{% endblock %}
