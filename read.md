@@ -8,12 +8,12 @@ Uma aplicação web interna desenvolvida em **Flask** para simplificar e agiliza
 
 A ferramenta permite que administradores realizem tarefas de forma rápida e intuitiva:
 
-| Funcionalidade | Descrição | Status |
-|----------------|-----------|--------|
-| 🔍 **Buscar Usuários** | Encontre usuários rapidamente por nome ou login | ✅ Ativo |
-| 🔒 **Habilitar / Desabilitar Contas** | Alterar o status de uma conta de usuário com um clique | ✅ Ativo |
-| 🔑 **Resetar Senhas** | Defina novas senhas temporárias para os usuários | ✅ Ativo |
-| ➕ **Criar Usuário** | Adicionar novos usuários ao AD | ⚠️ Em manutenção |
+| Funcionalidade | Descrição | Status | Demonstração |
+|----------------|-----------|--------|--------------|
+| 🔍 **Buscar Usuários** | Encontre usuários rapidamente por nome ou login | ✅ Ativo | ![Buscar Usuários](https://media.giphy.com/media/3o7TKtnuHOHHUjR38Y/giphy.gif) |
+| 🔒 **Habilitar / Desabilitar Contas** | Alterar o status de uma conta de usuário com um clique | ✅ Ativo | ![Habilitar/Desabilitar](https://media.giphy.com/media/l0HlD6p3XCE8rDsRi/giphy.gif) |
+| 🔑 **Resetar Senhas** | Defina novas senhas temporárias para os usuários | ✅ Ativo | ![Resetar Senha](https://media.giphy.com/media/xT9IgG50Fb7Mi0prBC/giphy.gif) |
+| ➕ **Criar Usuário** | Adicionar novos usuários ao AD | ⚠️ Em manutenção | N/A |
 
 ![Dashboard](https://via.placeholder.com/800x300.png?text=Dashboard+AD+Web)  
 *Exemplo da interface do Gerenciador de AD*
@@ -26,96 +26,67 @@ A ferramenta permite que administradores realizem tarefas de forma rápida e int
 
 - **Instale o Python 3**: [Download Python](https://www.python.org/downloads/)  
 - **Editor de Código**: Recomendado usar Visual Studio Code ou outro de sua preferência.  
-- **Clone o Repositório**:
+- **Clone o Repositório**:  
 
 ```bash
 git clone https://github.com/seu-usuario/gerenciador-ad-web.git
 cd gerenciador-ad-web
-```
 
----
 
-### 2️⃣ Instalar as Bibliotecas
-
-```bash
+2️⃣ Instalar as Bibliotecas
+bash
+Copiar código
 pip install -r requirements.txt
-```
 
----
+3️⃣ Configurar a Conexão com o Active Directory
+Execute o script descobrir_ad.py em um servidor AD ou máquina com RSAT:
 
-### 3️⃣ Configurar a Conexão com o Active Directory
-
-Execute o script `descobrir_ad.py` em um servidor AD ou máquina com RSAT:
-
-```bash
+bash
+Copiar código
 python descobrir_ad.py
-```
-
 Copie as informações exibidas no terminal:
 
-```python
+plaintext
+Copiar código
+✅ Configuração do Active Directory descoberta com sucesso!
+
 # --- Configurações de Conexão ---
-AD_SERVER = '0000000'           # Endereço ou IP do servidor AD
-AD_PORT = 0000                   # Porta do serviço LDAP
-AD_DOMAIN_NETBIOS = 'nome'       # Nome NETBIOS do domínio
-AD_DOMAIN_UPN = 'nome'           # UPN do domínio
-SEARCH_BASE = 'DC=nome,DC=nome,DC=nome'  # Base para busca no AD
+AD_SERVER = '0000000'
+AD_PORT = 0000
+AD_DOMAIN_NETBIOS = 'nome'
+AD_DOMAIN_UPN = 'nome'
+SEARCH_BASE = 'DC=nome,DC=nome,DC=nome'
 
 # --- Configuração de Segurança ---
 AD_REQUIRED_GROUP_DN = 'CN=Domain Admins,CN=Users,DC=nome,DC=nome,DC=nome'
-```
 
-> ⚠️ **Dicas importantes:**  
-> - Ajuste o `SEARCH_BASE` para a **OU principal** que contém seus usuários.  
-> - Ajuste o `AD_REQUIRED_GROUP_DN` para o grupo de TI ou ADM que terá acesso à aplicação.
-
----
-
-### 4️⃣ Atualizar o `app.py`
-
-```python
+4️⃣ Atualizar o app.py
+python
+Copiar código
 # app.py
 
 AD_SERVER = '0000000'
 AD_PORT = 0000
 AD_DOMAIN_NETBIOS = 'nome'
 AD_DOMAIN_UPN = 'nome'
-SEARCH_BASE = 'OU=HRMJ,DC=hrmj,DC=pa,DC=org'  # Ajuste para sua OU principal
+SEARCH_BASE = 'OU=HRMJ,DC=hrmj,DC=pa,DC=org'
+# IMPORTANTE: Ajuste para sua OU principal
 
 AD_REQUIRED_GROUP_DN = 'CN=TI,OU=TI,OU=ADM,OU=Users,OU=nome,DC=nome,DC=nome,DC=nome'
-# IMPORTANTE: Use o DN do seu grupo de TI ou do setor ADM do servidor
-```
+# IMPORTANTE: Use o DN do seu grupo de TI se for o setor ADM do servidor
+🔐 Controle de Acesso
+Somente membros do grupo TI podem acessar a aplicação.
 
----
+O login valida automaticamente se o usuário pertence ao grupo definido na variável AD_REQUIRED_GROUP_DN dentro do app.py.
 
-### 🔐 Controle de Acesso
 
-- Apenas membros do grupo definido em `AD_REQUIRED_GROUP_DN` podem acessar a aplicação.  
-- O login valida automaticamente se o usuário pertence ao grupo.  
-- Usuários não autorizados receberão uma mensagem de acesso negado.  
-- Ao realizar o primeiro login, o usuário deve alterar a senha temporária para uma senha pessoal.
-
----
-
-### ▶️ Executando a Aplicação
-
-```bash
+▶️ Executando a Aplicação
+bash
+Copiar código
 python app.py
-```
-
 Abra o navegador e acesse:
 
-```
+cpp
+Copiar código
 http://127.0.0.1:5000
-```
-
----
-
-### 📌 Observações Finais
-
-- Certifique-se de que o servidor onde a aplicação será executada tem conectividade com o AD.  
-- Funcionalidades ativas atualmente: busca de usuários, habilitar/desabilitar contas, reset de senhas.  
-- Criação de novos usuários no AD ainda está em manutenção.  
-- Para suporte ou solicitações novas, utilize o GLPI.  
-- Todos os acessos ao TASY devem ser preenchidos no formulário de criação de acessos e validados via GLPI, garantindo que a solicitação seja protocolada corretamente.
 

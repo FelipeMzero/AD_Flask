@@ -1,93 +1,104 @@
-{% extends "layout.html" %}
-{% block title %}Buscar Usuário{% endblock %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Buscar Usuário - Gerenciador AD</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        .table td {
+            vertical-align: middle;
+        }
+        .btn-sm {
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h3 class="mb-4">🔍 Buscar Usuário no Active Directory</h3>
 
-{% block content %}
-<div class="card">
-    <div class="card-header">
-        <h3>Buscar e Gerenciar Usuário</h3>
-    </div>
-    <div class="card-body">
-        <form method="post" class="mb-4">
-            <div class="input-group">
-                <input type="text" class="form-control" name="termo" placeholder="Digite parte do nome ou login" value="{{ termo or '' }}">
-                <div class="input-group-append">
-                    <button class="btn btn-primary" type="submit">Buscar</button>
-                </div>
-            </div>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <form method="POST" class="d-flex mb-4">
+            <input type="text" name="termo" value="{{ termo or '' }}" class="form-control me-2" placeholder="Digite o nome ou login do usuário" required>
+            <button type="submit" class="btn btn-primary">Buscar</button>
+            <a href="{{ url_for('menu') }}" class="btn btn-secondary ms-2">Voltar</a>
         </form>
 
-        {% if usuarios is not none %}
-            {% if usuarios %}
-                <div class="table-responsive">
-                    <table class="table table-bordered table-hover">
-                        <thead>
-                            <tr>
-                                <th>Login</th>
-                                <th>Nome Completo</th>
-                                <th>Status</th>
-                                <th style="width: 40%;">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for user in usuarios %}
-                            <tr>
-                                <td>{{ user.sam }}</td>
-                                <td>{{ user.cn }}</td>
-                                <td>
-                                    <span class="badge badge-{{ 'success' if user.status == 'Habilitado' else 'warning' }}">
-                                        {{ user.status }}
-                                    </span>
-                                </td>
-                                <td>
-                                    <form class="form-inline">
-                                        {% if user.status == 'Habilitado' %}
-                                        <button type="button" class="btn btn-warning btn-sm mr-2" data-toggle="modal" data-target="#confirmModal" data-action="desabilitar" data-user-dn="{{ user.dn }}" data-user-cn="{{ user.cn }}">Desabilitar</button>
-                                        {% else %}
-                                        <button type="button" class="btn btn-success btn-sm mr-2" data-toggle="modal" data-target="#confirmModal" data-action="habilitar" data-user-dn="{{ user.dn }}" data-user-cn="{{ user.cn }}">Habilitar</button>
-                                        {% endif %}
-                                        <div class="input-group input-group-sm">
-                                            <input type="password" name="nova_senha" class="form-control" placeholder="Nova senha">
-                                            <div class="input-group-append">
-                                                <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#confirmModal" data-action="resetar_senha" data-user-dn="{{ user.dn }}" data-user-cn="{{ user.cn }}">Resetar</button>
-                                            </div>
-                                        </div>
-                                    </form>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            {% elif termo %}
-                <div class="alert alert-info">Nenhum usuário encontrado para o termo "<strong>{{ termo }}</strong>".</div>
-            {% endif %}
-        {% endif %}
-        <a href="{{ url_for('menu') }}" class="btn btn-secondary mt-3">Voltar ao Menu</a>
-    </div>
-</div>
+        {% if usuarios %}
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Usuário (sAMAccountName)</th>
+                            <th>Nome Completo (CN)</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in usuarios %}
+                        <tr>
+                            <td>{{ user.sam }}</td>
+                            <td>{{ user.cn }}</td>
+                            <td>
+                                {% if user.status == "Habilitado" %}
+                                    <span class="badge bg-success">{{ user.status }}</span>
+                                {% else %}
+                                    <span class="badge bg-danger">{{ user.status }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <!-- Formulário: Resetar senha -->
+                                <form method="POST" action="{{ url_for('gerenciar_usuario') }}" class="d-inline">
+                                    <input type="hidden" name="user_dn" value="{{ user.dn }}">
+                                    <input type="hidden" name="acao" value="resetar_senha">
+                                    <div class="input-group input-group-sm mb-1">
+                                        <input type="password" name="nova_senha" class="form-control form-control-sm" placeholder="Nova senha" required>
+                                        <button type="submit" class="btn btn-warning btn-sm">🔁 Resetar Senha</button>
+                                    </div>
+                                    <small class="text-muted">Usuário precisará trocar no próximo logon.</small>
+                                </form>
 
-<div class="modal fade" id="confirmModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Confirmar Ação</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <p class="modal-body-text"></p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                <form action="{{ url_for('gerenciar_usuario') }}" method="post">
-                    <input type="hidden" name="user_dn" id="modal-confirm-form-user-dn">
-                    <input type="hidden" name="acao" id="modal-confirm-form-action">
-                    <input type="hidden" name="nova_senha" id="modal-confirm-form-nova-senha">
-                    <button type="submit" class="btn btn-danger">Confirmar</button>
-                </form>
+                                <!-- Formulário: Habilitar/Desabilitar -->
+                                <form method="POST" action="{{ url_for('gerenciar_usuario') }}" class="d-inline">
+                                    <input type="hidden" name="user_dn" value="{{ user.dn }}">
+                                    {% if user.status == "Habilitado" %}
+                                        <input type="hidden" name="acao" value="desabilitar">
+                                        <button type="submit" class="btn btn-danger btn-sm">🚫 Desabilitar</button>
+                                    {% else %}
+                                        <input type="hidden" name="acao" value="habilitar">
+                                        <button type="submit" class="btn btn-success btn-sm">✅ Habilitar</button>
+                                    {% endif %}
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
+        {% elif termo %}
+            <div class="alert alert-warning mt-4">Nenhum usuário encontrado para "{{ termo }}".</div>
+        {% endif %}
     </div>
-</div>
-{% endblock %}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
