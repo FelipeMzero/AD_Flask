@@ -9,16 +9,16 @@ SECRET_KEY = os.urandom(24)
 
 # --- Configurações do Active Directory ---
 # ATENÇÃO: Preencha estas variáveis com os dados do seu ambiente
-AD_SERVER = '10.172.0.31'          # IP ou nome do seu Domain Controller
+AD_SERVER = '0'          # IP ou nome do seu Domain Controller
 AD_PORT = 636                     # Porta LDAPS (SSL/TLS)
-AD_DOMAIN_NETBIOS = 'HRMJ'        # Nome NetBIOS do domínio
-AD_DOMAIN_UPN = 'hrmj.org.pa'     # Sufixo UPN
-SEARCH_BASE = 'OU=HRMJ,DC=hrmj,DC=pa,DC=org' # Base de busca principal
+AD_DOMAIN_NETBIOS = '0'        # Nome NetBIOS do domínio
+AD_DOMAIN_UPN = '0a'     # Sufixo UPN
+SEARCH_BASE = '0' # Base de busca principal
 
 # --- Grupo autorizado a usar a ferramenta ---
 # DN completo (Distinguished Name) do grupo. Somente membros deste grupo poderão fazer login.
 # ATENÇÃO: ESTE VALOR PRECISA SER O CAMINHO EXATO DO SEU GRUPO DE TI NO AD.
-AD_REQUIRED_GROUP_DN = 'CN=TI,OU=TI,OU=ADM,OU=Users,OU=HRMJ,DC=hrmj,DC=pa,DC=org'
+AD_REQUIRED_GROUP_DN = '0'
 
 # --- Constantes do Active Directory ---
 # Flags do UserAccountControl (UAC)
@@ -274,4 +274,5 @@ def gerenciar_usuario():
 if __name__ == "__main__":
     # O host '0.0.0.0' torna a aplicação acessível na sua rede local.
     # debug=True é ótimo para desenvolvimento, mas deve ser desativado em produção.
+
     app.run(debug=True, host='0.0.0.0', port=5000)
